@@ -1,33 +1,58 @@
 import React, {Component} from 'react'
 import FormValidator from './FormValidator';
-
-
+import PopUp from './PopUp';
 
 class Formulario extends Component{
     constructor(props){
         super(props);
-        this.validador = new FormValidator({
-            campo:'nome',
-            metodo:'isEmpty'
-        });
+        this.validador = new FormValidator([
+            {        
+                campo:'nome',
+                metodo:'isEmpty',
+                validoQuando: false,
+                mensagem: 'Insira um nome!'
+            },
+            {        
+                campo:'livro',
+                metodo:'isEmpty',
+                validoQuando: false,
+                mensagem: 'Insira um livro!'
+            },
+            {        
+                campo:'preco',
+                metodo:'isInt',
+                args:[{min:0, max:99999}],
+                validoQuando: true,
+                mensagem: 'Insira um valor numérico entre 0 e 99999!'
+            },
+        ]);
 
         this.stateInicial = {
             nome:'',
             livro:'',
             preco:'',
+            validacao: this.validador.valido(),
         }
 
         this.state = this.stateInicial;
     }
     submitFormulario = () =>{
-        if(this.validador.valida(this.state)){
+        const validacao = this.validador.valida(this.state)
+
+        if(validacao.isValid){
             this.props.escutaSubmit(this.state);
             this.setState(this.stateInicial);
         }
         else{
-            console.log('Submit Bloqueado!')
-        }
-        
+            const {nome, livro, preco} = validacao;
+            const campos = [nome, livro, preco];
+            const camposInvalidos = campos.filter(elem => {
+                return elem.isInvalid
+            });
+            camposInvalidos.forEach(campo =>{
+                PopUp.exibeMensagem('error', campo.message)
+            });
+        }   
     }
     escutadorDeInput = event => {
         const {name,value} = event.target;
@@ -36,7 +61,6 @@ class Formulario extends Component{
             [name]:value
         })
     }
-
     render(){
         const {nome, livro, preco} = this.state
         return(

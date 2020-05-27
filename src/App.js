@@ -4,53 +4,47 @@ import Form from './Formulario'
 import 'materialize-css/dist/css/materialize.min.css';
 import Header from './Header';
 import './App.css';
-class App extends Component{
-  state = {
-    autores:[
-      {
-        nome: 'Paulo',
-        livro: 'React',
-        preco: '1000'
-      },
-      {
-        nome: 'Daniel',
-        livro: 'Java',
-        preco: '99'
-      },
-      {
-        nome: 'Marcos',
-        livro: 'Design',
-        preco: '150'
-      },
-      {
-        nome: 'Bruno',
-        livro: 'DevOps',
-        preco: '100'
-      },
-      {
-        nome: 'Ericles',
-        livro: 'nada',
-        preco: '0'
-      }
-    ],
-  }
+import PopUp from './PopUp';
+import ApiService from './ApiService';  
 
-removeAutor= index =>{
+class App extends Component{
+
+  constructor(props){
+    super(props);
+    this.state = {
+      autores:[],
+    }
+  }
+  
+removeAutor= id =>{
   const {autores} = this.state;
 
   this.setState(
     {
-      autores: autores.filter((autor, posAtual)=>{
-        return posAtual !== index;
+      autores: autores.filter((autor)=>{
+        return autor.id !== id;
       }),
     }
   );
+  PopUp.exibeMensagem('error', "Autor removido com sucesso");
+  ApiService.RemoveAutor(id);
 }
 
 escutaSubmit= autor =>{
-  this.setState({ autores: [...this.state.autores, autor]})
+  ApiService.CriaAutor(JSON.stringify(autor))
+    .then(res => res.data)
+    .then(autor =>{
+      this.setState({autores:[...this.state.autores, autor]})
+    })
+  PopUp.exibeMensagem('success', "Autor adicionado com sucesso!")
 }
-  render() {
+  componentDidMount(){
+    ApiService.ListaNomes().then(res => {
+        this.setState({livros:[...this.state.autores, ...res.data]})
+    });
+
+  }
+  render(){  
     return (
       <Fragment>
         <Header />
