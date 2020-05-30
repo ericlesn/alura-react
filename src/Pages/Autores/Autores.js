@@ -1,8 +1,8 @@
 import React, {Fragment, Component } from 'react';
-import Header from './Header';
-import DataTable from './DataTable'
-import ApiService from './ApiService';
-
+import Header from '../../Components/Header/Header';
+import DataTable from '../../Components/DataTable/DataTable'
+import ApiService from '../../utils/ApiService';
+import PopUp from  '../../utils/PopUp'
 
 
 class Autores extends Component{
@@ -10,18 +10,21 @@ class Autores extends Component{
         super(props);
 
         this.state = {
-            nomes:[
-                
-            ],
-
+            nomes:[],
             titulo: 'Autores'
         }
     }
     componentDidMount(){
         ApiService.ListaNomes()
+            .then(res => ApiService.TrataErros(res))
             .then(res =>{
-                this.setState({livros:[...this.state.nomes, res.data]})
-            }) 
+                if(res.message === 'success'){
+                    PopUp.exibeMensagem('sucess', 'Autores listados com sucesso')
+                    this.setState({livros:[...this.state.nomes, res.data]})
+                    
+                }
+            })
+            .catch(err => PopUp.exibeMensagem('err', 'Falha na listagem de autores')) 
     }
     render(){
         return(

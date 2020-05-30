@@ -1,8 +1,8 @@
 import React, { Component, Fragment } from 'react';
-import Header from './Header';
-import DataTable from './DataTable';
-import ApiService from './ApiService';
-import PopUp from './PopUp';
+import Header from '../../Components/Header/Header';
+import DataTable from '../../Components/DataTable/DataTable';
+import ApiService from '../../utils/ApiService';
+import PopUp from '../../utils/PopUp';
 class Livros extends Component {
 
     constructor(props) {
@@ -16,10 +16,13 @@ class Livros extends Component {
 
     componentDidMount(){
         ApiService.ListaLivros()
-                    .then(res => {
-                            this.setState({livros : [...this.state.livros, ...res.data]});
-                            PopUp.exibeMensagem('success', 'Livros listados com sucesso');   
-                    });
+            .then(res => {
+                if(res.message === 'success'){
+                    this.setState({livros : [...this.state.livros, ...res.data]});
+                    PopUp.exibeMensagem('success', 'Livros listados com sucesso');   
+                }           
+            })
+            .catch(err=> PopUp.exibeMensagem('error', 'Falha na comunicação com a API ao listar os livros'))
     }
 
     render() {
